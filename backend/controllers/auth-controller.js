@@ -64,16 +64,25 @@ class AuthController {
             activated: false,
         });
 
-        // access token is stored in local storage and refreshed token is stored in cookie (3:31:33)
+        await tokenService.storeRefreshToken(refreshToken, user._id);
+
+        // cookie is used because its more secure than local storage
         res.cookie('refreshToken', refreshToken, {
             maxAge: 1000 * 60 * 60 * 24 * 30, // cookie valid for 30 days
             httpOnly: true, // to secure it, now js will not be able to read this cookie only server will be able to read
         });
 
+
+        res.cookie('refreshToken', refreshToken, {
+            maxAge: 1000 * 60 * 60 * 24 * 30, // cookie valid for 30 days
+            httpOnly: true, // to secure it, now js will not be able to read this cookie only server will be able to read
+        });
+
+
         const userDto = new UserDto(user);
 
-        
-        res.json({ accessToken, user: userDto });
+
+        res.json({ user: userDto, auth : true }); // sending auth key as a flag to let the client know that authentication is successful
     }
 }
 
