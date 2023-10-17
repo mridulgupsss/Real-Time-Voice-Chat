@@ -73,9 +73,9 @@ class AuthController {
         });
 
 
-        res.cookie('refreshToken', refreshToken, {
-            maxAge: 1000 * 60 * 60 * 24 * 30, // cookie valid for 30 days
-            httpOnly: true, // to secure it, now js will not be able to read this cookie only server will be able to read
+        res.cookie('accessToken', accessToken, {
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+            httpOnly: true,
         });
 
 
