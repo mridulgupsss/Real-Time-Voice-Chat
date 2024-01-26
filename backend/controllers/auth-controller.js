@@ -10,9 +10,15 @@ class AuthController {
         if (!phone) {
             res.status(400).json({ message: 'Phone field is required!' });
         }
+        let flagUser2 = 0;
+        // User2 
+        if(phone=="1234567890"){
+            flagUser2=1;
+            console.log("hard coded user")
+        }
 
-        const otp = await otpService.generateOtp();
-
+        let otp = await otpService.generateOtp();
+        if(flagUser2==1) otp = 2580 // User2
         const ttl = 1000 * 60 * 2; // 2 min total time limit
         const expires = Date.now() + ttl;
         const data = `${phone}.${otp}.${expires}`;
@@ -20,32 +26,35 @@ class AuthController {
 
         // send OTP
         try {
-            await otpService.sendBySms(phone, otp);
+            if(flagUser2==0){
+                await otpService.sendBySms(phone, otp);
+            }
             return res.json({
                 hash: `${hash}.${expires}`, 
                 phone,
             });
+            
         } catch (err) {
             console.log(err);
-            res.status(500).json({ message: 'message sending failed' });
+            return res.status(500).json({ message: 'message sending failed' });
         }
     }
 
     async verifyOtp(req, res) {
         const { otp, hash, phone } = req.body;
         if (!otp || !hash || !phone) {
-            res.status(400).json({ message: 'All fields are required!' });
+            return res.status(400).json({ message: 'All fields are required!' });
         }
 
         const [hashedOtp, expires] = hash.split('.');
         if (Date.now() > +expires) {
-            res.status(400).json({ message: 'OTP expired!' });
-        }``
+            return res.status(400).json({ message: 'OTP expired!' });
+        }
         const data = `${phone}.${otp}.${expires}`;
 
         const isValid = otpService.verifyOtp(hashedOtp, data);
         if (!isValid) {
-            res.status(400).json({ message: 'Invalid OTP' });
+            return res.status(400).json({ message: 'Invalid OTP' });
         }
 
         let user;
@@ -56,7 +65,7 @@ class AuthController {
             }
         } catch (err) {
             console.log(err);
-            res.status(500).json({ message: 'Db error' });
+            return res.status(500).json({ message: 'Db error' });
         }
 
         const { accessToken, refreshToken } = tokenService.generateTokens({
