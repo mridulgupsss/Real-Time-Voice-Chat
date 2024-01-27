@@ -39,9 +39,15 @@ class ActivateController {
             }
             user.activated = true;
             user.name = name;
-            user.avatar = `/storage/${imagePath}`;
+            let imagepath = "http://localhost:5500/storage/"+imagePath;
+            user.avatar = imagepath;
+           
             user.save();
+            
+            // console.log("user", user);
+            // console.log("user.avatar", user.avatar)
             res.json({ user: new UserDto(user), auth: true });
+            // res.json({ user: new UserDto(user), auth: true });
         } catch (err) {
             res.status(500).json({ message: 'Something went wrong!' });
         }
